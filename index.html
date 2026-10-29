@@ -986,32 +986,37 @@ seluruh dunia
 
             <div class="form-container">
               <h3>Hubungi Kami</h3>
-              
-              <form action="forms/contact.php" method="post" class="php-email-form">
+
+              <form id="contactForm" action="https://api.web3forms.com/submit" method="post" class="php-email-form">
+
+                <input type="hidden" name="access_key" value="d17ab538-0540-4e22-8d17-3d53d6a42249">
+                <input type="hidden" name="from_name" value="Website PT Hydrocolloid Indonesia">
+                <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">
+
                 <div class="form-floating mb-3">
-                  <input type="text" class="form-control" id="nameInput" name="name" placeholder="Full Name" required="">
+                  <input type="text" class="form-control" id="nameInput" name="name" placeholder="Nama Lengkap" required>
                   <label for="nameInput">Nama Lengkap</label>
                 </div>
 
                 <div class="form-floating mb-3">
-                  <input type="email" class="form-control" id="emailInput" name="email" placeholder="Email Address" required="">
+                  <input type="email" class="form-control" id="emailInput" name="email" placeholder="Alamat Email" required>
                   <label for="emailInput">Alamat Email</label>
                 </div>
 
                 <div class="form-floating mb-3">
-                  <input type="text" class="form-control" id="subjectInput" name="subject" placeholder="Subject" required="">
+                  <input type="text" class="form-control" id="subjectInput" name="subject" placeholder="Subyek" required>
                   <label for="subjectInput">Subyek</label>
                 </div>
 
                 <div class="form-floating mb-3">
-                  <textarea class="form-control" id="messageInput" name="message" rows="5" placeholder="Your Message" style="height: 150px" required=""></textarea>
+                  <textarea class="form-control" id="messageInput" name="message" rows="5" placeholder="Pesan" style="height: 150px" required></textarea>
                   <label for="messageInput">Pesan</label>
                 </div>
 
                 <div class="my-3">
-                  <div class="loading">Menunggu</div>
+                  <div class="loading">Mengirim...</div>
                   <div class="error-message"></div>
-                  <div class="sent-message">Pesan anda telah dikirim, terima kasih!</div>
+                  <div class="sent-message">Pesan Anda telah dikirim, terima kasih!</div>
                 </div>
 
                 <div class="d-grid">
@@ -1050,7 +1055,48 @@ seluruh dunia
 
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
+<script>
+    // Kirim form kontak lewat Web3Forms (menggantikan validate.js / contact.php)
+    document.addEventListener('submit', async function (e) {
+      const form = e.target.closest('#contactForm');
+      if (!form) return;
 
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      const loading = form.querySelector('.loading');
+      const error   = form.querySelector('.error-message');
+      const sent    = form.querySelector('.sent-message');
+      const btn     = form.querySelector('button[type="submit"]');
+
+      loading.style.display = 'block';
+      error.style.display = 'none';
+      sent.style.display = 'none';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' },
+          body: new FormData(form)
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          sent.style.display = 'block';
+          form.reset();
+        } else {
+          throw new Error(data.message || 'Gagal mengirim');
+        }
+      } catch (err) {
+        error.textContent = 'Pesan gagal dikirim. Silakan coba lagi nanti.';
+        error.style.display = 'block';
+      } finally {
+        loading.style.display = 'none';
+        btn.disabled = false;
+      }
+    }, true);
+  </script>
 </body>
 
 </html>
